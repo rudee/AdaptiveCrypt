@@ -34,7 +34,13 @@
     <Compile Include="..\Solution.AssemblyInfo.cs">
       <Link>Properties\Solution.AssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="ModularCrypt.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
