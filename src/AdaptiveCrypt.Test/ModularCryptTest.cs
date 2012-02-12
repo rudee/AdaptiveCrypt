@@ -1,5 +1,4 @@
 ﻿using AdaptiveCrypt;
-using Moq;
 using NUnit.Framework;
 
 namespace AdaptiveCrypt.Test
@@ -16,7 +15,10 @@ namespace AdaptiveCrypt.Test
         public void TearDown()
         {
         }
-
+        
+        [TestCase("$$10$",                  '$', "",       10, "",     null,     "$$10$$")]
+        [TestCase("$$10$$",                 '$', "",       10, "",     null,     "$$10$$")]
+        [TestCase("$scheme$10$",            '$', "scheme", 10, "",     null,     "$scheme$10$$")]
         [TestCase("$scheme$10$salt",        '$', "scheme", 10, "salt", null,     "$scheme$10$salt$")]
         [TestCase("$scheme$10$salt$",       '$', "scheme", 10, "salt", null,     "$scheme$10$salt$")]
         [TestCase("$scheme$10$salt$cipher", '$', "scheme", 10, "salt", "cipher", "$scheme$10$salt$cipher")]
@@ -37,7 +39,9 @@ namespace AdaptiveCrypt.Test
             Assert.AreEqual(resultCipher,     mc.Cipher);
             Assert.AreEqual(resultToString,   mc.ToString());
         }
-
+        
+        [TestCase('$', "",       10, "",     null,     null,     "$$10$$")]
+        [TestCase('$', "scheme", 10, "",     null,     null,     "$scheme$10$$")]
         [TestCase('$', "scheme", 10, "salt", null,     null,     "$scheme$10$salt$")]
         [TestCase('$', "scheme", 10, "salt", "",       null,     "$scheme$10$salt$")]
         [TestCase('$', "scheme", 10, "salt", "cipher", "cipher", "$scheme$10$salt$cipher")]
@@ -54,12 +58,12 @@ namespace AdaptiveCrypt.Test
                                       workFactor,
                                       salt,
                                       cipher);
-            Assert.AreEqual(delim,            mc.Delim);
-            Assert.AreEqual(scheme,           mc.Scheme);
-            Assert.AreEqual(workFactor,       mc.WorkFactor);
-            Assert.AreEqual(salt,             mc.Salt);
-            Assert.AreEqual(resultCipher,     mc.Cipher);
-            Assert.AreEqual(resultToString,   mc.ToString());
+            Assert.AreEqual(delim,          mc.Delim);
+            Assert.AreEqual(scheme,         mc.Scheme);
+            Assert.AreEqual(workFactor,     mc.WorkFactor);
+            Assert.AreEqual(salt,           mc.Salt);
+            Assert.AreEqual(resultCipher,   mc.Cipher);
+            Assert.AreEqual(resultToString, mc.ToString());
         }
     }
 }
