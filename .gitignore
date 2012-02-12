@@ -1,0 +1,10 @@
+# git ignore file
+bin/
+obj/
+/src/packages
+*.suo
+*.user
+*.vsmdi
+*.VisualState.xml
+TestResult.xml
+_ReSharper.*
