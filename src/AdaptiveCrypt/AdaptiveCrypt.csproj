@@ -34,10 +34,16 @@
     <Compile Include="..\Solution.AssemblyInfo.cs">
       <Link>Properties\Solution.AssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="IHashingService.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ModularCrypt.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sha512HashingService.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
