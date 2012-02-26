@@ -10,23 +10,42 @@ namespace AdaptiveCrypt
         public ModularCrypt(string modularCryptFormatStr,
                             char   delim)
         {
-            string[] mcParts = modularCryptFormatStr.Split(new[] { delim }, StringSplitOptions.None);
+            if (string.IsNullOrWhiteSpace(modularCryptFormatStr))
+            {
+                throw new ArgumentException("Cannot be null, empty or whitespace.", "modularCryptFormatStr");
+            }
 
-            Delim      = delim;
-            Scheme     = mcParts[FORMAT_SCHEME_INDEX];
-            WorkFactor = int.Parse(mcParts[FORMAT_WORKFACTOR_INDEX]);
-            Salt       = mcParts[FORMAT_SALT_INDEX];
+            string[] mcParts = modularCryptFormatStr.Split(new [] { delim },
+                                                           StringSplitOptions.None);
+
+            if (mcParts.Length - 1 != 4)
+            {
+                throw new ArgumentException("Invalid ModularCryptFormat String: " + modularCryptFormatStr, "modularCryptFormatStr");
+            }
+
+            Delim  = delim;
+            Scheme = mcParts[FORMAT_SCHEME_INDEX];
+
+            try
+            {
+                WorkFactor = int.Parse(mcParts[FORMAT_WORKFACTOR_INDEX]);
+            }
+            catch (FormatException)
+            {
+                throw new ArgumentException("Invalid WorkFactor", "modularCryptFormatStr");
+            }
+
+            Salt = mcParts[FORMAT_SALT_INDEX];
 
             try
             {
                 Cipher = mcParts[FORMAT_CIPHER_INDEX];
+                if (Cipher == string.Empty)
+                {
+                    Cipher = null;
+                }
             }
             catch (IndexOutOfRangeException)
-            {
-                Cipher = null;
-            }
-
-            if (Cipher == string.Empty)
             {
                 Cipher = null;
             }
@@ -38,12 +57,23 @@ namespace AdaptiveCrypt
                             string salt,
                             string cipher)
         {
-            Delim      = delim;
-            Scheme     = scheme;
-            WorkFactor = workFactor;
-            Salt       = salt;
-            Cipher     = cipher;
+            Delim = delim;
 
+            if (scheme == null)
+            {
+                throw new ArgumentException("Cannot be null.", "scheme");
+            }
+            Scheme = scheme;
+
+            WorkFactor = workFactor;
+
+            Salt = salt;
+            if (Salt == string.Empty)
+            {
+                Salt = null;
+            }
+
+            Cipher = cipher;
             if (Cipher == string.Empty)
             {
                 Cipher = null;
