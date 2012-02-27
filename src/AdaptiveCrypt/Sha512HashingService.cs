@@ -14,17 +14,24 @@ namespace AdaptiveCrypt
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentException(@"key must be non-null and not empty or white-space.", "key");
+                throw new ArgumentException(@"key must be non-null and not empty or white-space.",
+                                            "key");
             }
 
             if (saltLength < 0)
             {
-                throw new ArgumentOutOfRangeException("saltLength", saltLength, @"saltLength must be greater than 0.");
+                throw new ArgumentOutOfRangeException("saltLength",
+                                                      saltLength,
+                                                      @"saltLength must be greater than 0.");
             }
 
-            if (workfactor < 0 || 30 < workfactor)
+            if (workfactor < MIN_VALID_WORK_FACTOR || MAX_VALID_WORK_FACTOR < workfactor)
             {
-                throw new ArgumentOutOfRangeException("workfactor", workfactor, @"workfactor must be between 0 and 30 inclusive.");
+                throw new ArgumentOutOfRangeException("workfactor",
+                                                      workfactor,
+                                                      string.Format("workfactor must be between {0} and {1} inclusive.",
+                                                                    MIN_VALID_WORK_FACTOR,
+                                                                    MAX_VALID_WORK_FACTOR));
             }
 
             _key        = key;
@@ -46,12 +53,30 @@ namespace AdaptiveCrypt
                            string salt,
                            int    workFactor)
         {
-            if (workFactor < MIN_WORK_FACTOR || MAX_WORK_FACTOR < workFactor)
+            if (str == null)
             {
-                throw new ArgumentOutOfRangeException("workFactor", workFactor, @"workFactor value must be between " + MIN_WORK_FACTOR + @" and " + MAX_WORK_FACTOR + @" inclusive.");
+                throw new ArgumentNullException("str",
+                                                "str cannot be null");
             }
 
-            byte[] sha512Key = CreateHashKey(str, salt, workFactor);
+            if (salt == null)
+            {
+                throw new ArgumentNullException("salt",
+                                                "salt cannot be null");
+            }
+
+            if (workFactor < MIN_VALID_WORK_FACTOR || MAX_VALID_WORK_FACTOR < workFactor)
+            {
+                throw new ArgumentOutOfRangeException("workFactor",
+                                                      workFactor,
+                                                      string.Format("workFactor value must be between {0} and {1} inclusive.",
+                                                                    MIN_VALID_WORK_FACTOR,
+                                                                    MAX_VALID_WORK_FACTOR));
+            }
+
+            byte[] sha512Key = CreateHashKey(str,
+                                             salt,
+                                             workFactor);
             byte[] hashInput = Encoding.UTF8.GetBytes(str + salt + _key);
             var    sha512    = new HMACSHA512(sha512Key);
             byte[] hash      = sha512.ComputeHash(hashInput);
@@ -94,7 +119,7 @@ namespace AdaptiveCrypt
         private readonly int    _saltLength;
         private readonly int    _workfactor;
 
-        private const int MIN_WORK_FACTOR = 0;
-        private const int MAX_WORK_FACTOR = 30;
+        private const int MIN_VALID_WORK_FACTOR = 0;
+        private const int MAX_VALID_WORK_FACTOR = 30;
     }
 }
