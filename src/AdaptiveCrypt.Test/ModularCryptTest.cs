@@ -7,6 +7,16 @@ namespace AdaptiveCrypt.Test
     [TestFixture]
     class ModularCryptTest
     {
+        [TestFixtureSetUp]
+        public void TestFixtureSetUp()
+        {
+        }
+
+        [TestFixtureTearDown]
+        public void TestFixtureTearDown()
+        {
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -64,7 +74,7 @@ namespace AdaptiveCrypt.Test
             Assert.Throws<ArgumentException>(() => new ModularCrypt(modularCryptFormatStr,
                                                                     delim));
         }
-        
+
         [TestCase('$',
                   "", 10, null, null,
                   "", 10, null, null,

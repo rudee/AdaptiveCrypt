@@ -6,6 +6,16 @@ namespace AdaptiveCrypt.Test
     [TestFixture]
     class Sha512HashingServiceTest
     {
+        [TestFixtureSetUp]
+        public void TestFixtureSetUp()
+        {
+        }
+
+        [TestFixtureTearDown]
+        public void TestFixtureTearDown()
+        {
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -128,7 +138,6 @@ namespace AdaptiveCrypt.Test
             Assert.Throws<ArgumentOutOfRangeException>(() => hs.Hash(str,
                                                                      salt,
                                                                      workFactor2));
-
         }
     }
 }
