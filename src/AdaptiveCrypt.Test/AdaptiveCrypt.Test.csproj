@@ -34,6 +34,7 @@
     <Compile Include="..\Solution.AssemblyInfo.cs">
       <Link>Properties\Solution.AssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AesEncryptionServiceTest.cs" />
     <Compile Include="ModularCryptTest.cs">
       <SubType>Code</SubType>
     </Compile>
