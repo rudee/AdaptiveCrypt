@@ -1,5 +1,8 @@
 ﻿namespace AdaptiveCrypt
 {
+    /// <summary>
+    /// Performs symmetric encryption and decryption with variable key, salt length and workFactor.
+    /// </summary>
     public interface IEncryptionService
     {
         /// <summary>
@@ -10,7 +13,7 @@
         /// <summary>
         /// Gets the work factor to be used by this encryption service.
         /// </summary>
-        int Workfactor { get; }
+        int WorkFactor { get; }
 
         /// <summary>
         /// Encrypts the given value.

@@ -5,11 +5,14 @@ using System.Text;
 
 namespace AdaptiveCrypt
 {
+    /// <summary>
+    /// Performs symmetric encryption and decryption with variable key, salt length and workFactor using the System.Security.Cryptography.AesCryptoServiceProvider class.
+    /// </summary>
     public class AesEncryptionService : IEncryptionService
     {
         public AesEncryptionService(string key,
                                     int    saltLength,
-                                    int    workfactor)
+                                    int    workFactor)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -24,18 +27,18 @@ namespace AdaptiveCrypt
                                                       @"saltLength must be greater than 0.");
             }
 
-            if (workfactor < MIN_VALID_WORK_FACTOR || MAX_VALID_WORK_FACTOR < workfactor)
+            if (workFactor < MIN_VALID_WORK_FACTOR || MAX_VALID_WORK_FACTOR < workFactor)
             {
-                throw new ArgumentOutOfRangeException("workfactor",
-                                                      workfactor,
-                                                      string.Format("workfactor must be between {0} and {1} inclusive.",
+                throw new ArgumentOutOfRangeException("workFactor",
+                                                      workFactor,
+                                                      string.Format("workFactor must be between {0} and {1} inclusive.",
                                                                     MIN_VALID_WORK_FACTOR,
                                                                     MAX_VALID_WORK_FACTOR));
             }
 
             _key        = key;
             _saltLength = saltLength;
-            _workfactor = workfactor;
+            _workFactor = workFactor;
         }
 
         public int SaltLength
@@ -43,9 +46,9 @@ namespace AdaptiveCrypt
             get { return _saltLength; }
         }
 
-        public int Workfactor
+        public int WorkFactor
         {
-            get { return _workfactor; }
+            get { return _workFactor; }
         }
 
         public string Encrypt(string str,
@@ -179,7 +182,7 @@ namespace AdaptiveCrypt
 
         private readonly string _key;
         private readonly int    _saltLength;
-        private readonly int    _workfactor;
+        private readonly int    _workFactor;
 
         private const int MIN_VALID_WORK_FACTOR = 0;
         private const int MAX_VALID_WORK_FACTOR = 30;

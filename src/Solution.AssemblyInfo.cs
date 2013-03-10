@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyCompany("Rudy Lee")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCopyright("Copyright © Rudy Lee 2012")]
+[assembly: AssemblyCopyright("Copyright © Rudy Lee 2013")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyFileVersion("0.1.0.0")]

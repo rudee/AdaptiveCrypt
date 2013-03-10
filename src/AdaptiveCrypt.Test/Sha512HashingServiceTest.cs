@@ -40,7 +40,7 @@ namespace AdaptiveCrypt.Test
                                               saltLength,
                                               workFactor);
             Assert.AreEqual(saltLength, hs.SaltLength);
-            Assert.AreEqual(workFactor, hs.Workfactor);
+            Assert.AreEqual(workFactor, hs.WorkFactor);
         }
 
         [TestCase(null, 10, 10)]

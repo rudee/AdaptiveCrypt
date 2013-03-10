@@ -63,7 +63,7 @@ namespace AdaptiveCrypt.Test
         [TestCase("$$$$$",                  '$')]
         [TestCase("$scheme",                '$')]
         [TestCase("$scheme$",               '$')]
-        [TestCase("$scheme$workfactor",     '$')]
+        [TestCase("$scheme$workFactor",     '$')]
         [TestCase("$scheme$10",             '$')]
         [TestCase("$scheme$10$",            '$')]
         [TestCase("$scheme$10$salt",        '$')]

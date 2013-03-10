@@ -1,5 +1,8 @@
 ﻿namespace AdaptiveCrypt
 {
+    /// <summary>
+    /// Computes a hash with variable key, salt length and workFactor.
+    /// </summary>
     public interface IHashingService
     {
         /// <summary>
@@ -10,7 +13,7 @@
         /// <summary>
         /// Gets the work factor to be used by this hashing service.
         /// </summary>
-        int Workfactor { get; }
+        int WorkFactor { get; }
 
         /// <summary>
         /// Creates a cryptographic hash.
