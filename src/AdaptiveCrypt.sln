@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdaptiveCrypt", "AdaptiveCrypt\AdaptiveCrypt.csproj", "{E2529445-60EC-4378-BDD6-F1C4FFCDF134}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdaptiveCrypt.Test", "AdaptiveCrypt.Test\AdaptiveCrypt.Test.csproj", "{3C2929EC-7F90-4570-9362-859CC93E0BE4}"
