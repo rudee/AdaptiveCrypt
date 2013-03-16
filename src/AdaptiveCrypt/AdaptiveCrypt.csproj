@@ -37,6 +37,7 @@
     <Compile Include="..\Solution.AssemblyInfo.cs">
       <Link>Properties\Solution.AssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AdaptiveCryptService.cs" />
     <Compile Include="AesEncryptionService.cs" />
     <Compile Include="IEncryptionService.cs" />
     <Compile Include="IHashingService.cs">

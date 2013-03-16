@@ -11,118 +11,80 @@ namespace AdaptiveCrypt
     /// </summary>
     public class Sha512HashingService : IHashingService
     {
-        public Sha512HashingService(string key,
-                                    int    saltLength,
-                                    int    workFactor)
+        public Sha512HashingService(byte[] key)
         {
-            if (string.IsNullOrWhiteSpace(key))
+            if (key == null)
             {
-                throw new ArgumentException(@"key must be non-null and not empty or white-space.",
-                                            "key");
+                key = new byte[] { };
             }
 
-            if (saltLength < 0)
-            {
-                throw new ArgumentOutOfRangeException("saltLength",
-                                                      saltLength,
-                                                      @"saltLength must be greater than 0.");
-            }
-
-            if (workFactor < MIN_VALID_WORK_FACTOR || MAX_VALID_WORK_FACTOR < workFactor)
-            {
-                throw new ArgumentOutOfRangeException("workFactor",
-                                                      workFactor,
-                                                      string.Format("workFactor must be between {0} and {1} inclusive.",
-                                                                    MIN_VALID_WORK_FACTOR,
-                                                                    MAX_VALID_WORK_FACTOR));
-            }
-
-            _key        = key;
-            _saltLength = saltLength;
-            _workFactor = workFactor;
+            _key = key;
         }
 
-        public int SaltLength
-        {
-            get { return _saltLength; }
-        }
-
-        public int WorkFactor
-        {
-            get { return _workFactor; }
-        }
-
-        public string Hash(string str,
-                           string salt,
+        public byte[] Hash(byte[] data,
+                           byte[] salt,
                            int    workFactor)
         {
-            if (str == null)
+            if (data == null)
             {
-                throw new ArgumentNullException("str",
-                                                "str cannot be null");
+                throw new ArgumentNullException("data", "Cannot be null");
             }
 
-            if (salt == null)
-            {
-                throw new ArgumentNullException("salt",
-                                                "salt cannot be null");
-            }
+            salt = salt ?? new byte[] { };
 
             if (workFactor < MIN_VALID_WORK_FACTOR || MAX_VALID_WORK_FACTOR < workFactor)
             {
                 throw new ArgumentOutOfRangeException("workFactor",
                                                       workFactor,
-                                                      string.Format("workFactor value must be between {0} and {1} inclusive.",
+                                                      string.Format("Value must be between {0} and {1} inclusive.",
                                                                     MIN_VALID_WORK_FACTOR,
                                                                     MAX_VALID_WORK_FACTOR));
             }
 
-            byte[] sha512Key = CreateHashKey(str,
+            byte[] sha512Key = CreateHashKey(_key,
                                              salt,
-                                             workFactor);
-            byte[] hashInput = Encoding.UTF8.GetBytes(str + salt + _key);
+                                             workFactor,
+                                             KEY_SIZE);
             var    sha512    = new HMACSHA512(sha512Key);
-            byte[] hash      = sha512.ComputeHash(hashInput);
 
-            return Convert.ToBase64String(hash);
+            return sha512.ComputeHash(data);
         }
 
         /// <summary>
         /// Creates the hash key to be used to construct a HMACSHA512 instance.
         /// </summary>
-        /// <param name="password">The password used to create the hash key.</param>
+        /// <param name="key">The value used to create the hash key.</param>
         /// <param name="salt">The salt used to create the hash key.</param>
         /// <param name="workFactor">The work factor to use to determine the number of iterations.</param>
-        /// <returns>A pseudo-random key bytes of size 64 bytes to be used to construct a HMACSHA512 instance.</returns>
-        private byte[] CreateHashKey(string str,
-                                     string salt,
-                                     int    workFactor)
+        /// <param name="size">The size of the key in bytes to create.</param>
+        /// <returns>A pseudo-random key to be used to construct a HMACSHA512 instance.</returns>
+        private static byte[] CreateHashKey(byte[] key,
+                                            byte[] salt,
+                                            int    workFactor,
+                                            int    size)
         {
-            byte[] saltAsBytes = Encoding.UTF8.GetBytes(salt);
             int iterations = 1 << workFactor;
 
             // The size of the salt used to create Rfc2898DeriveBytes must be at least 8 bytes.
-            if (saltAsBytes.Length < 8)
+            if (salt.Length < 8)
             {
                 // Increase the size and pad with the 0x00 byte value.
-                Array.Resize(ref saltAsBytes, 8);
+                Array.Resize(ref salt, 8);
             }
 
-            var db = new Rfc2898DeriveBytes(str + salt + _key,
-                                            saltAsBytes,
+            var db = new Rfc2898DeriveBytes(key,
+                                            salt,
                                             iterations);
 
-            // 64 bytes is the recommended size for the HMACSHA512 secret key
             // Note: this next statement is meant to be computationally intensive depending on the
             // value of the iterations variable.
-            return db.GetBytes(64);
+            return db.GetBytes(size);
         }
 
-        private readonly string _key;
-        private readonly int    _saltLength;
-        private readonly int    _workFactor;
+        private readonly byte[] _key;
 
         private const int MIN_VALID_WORK_FACTOR = 0;
         private const int MAX_VALID_WORK_FACTOR = 30;
+        private const int KEY_SIZE = 128; // 128 bytes is the recommended size for the HMACSHA512 secret key
     }
 }
