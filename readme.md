@@ -1,3 +1,3 @@
 # AdaptiveCrypt
 
-A future-proof password hashing/encryption library.
+A future-proof extensible hashing/encryption library.
