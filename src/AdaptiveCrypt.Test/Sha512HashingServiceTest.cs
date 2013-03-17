@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using NUnit.Framework;
 
 namespace AdaptiveCrypt.Test
@@ -26,118 +27,73 @@ namespace AdaptiveCrypt.Test
         {
         }
 
-        [Test]
-        public void Constructor_ValidParams_Instantiated([Values("key")]
-                                                         string key,
-
-                                                         [Values(0, 1, 10)]
-                                                         int saltLength,
-
-                                                         [Values(0, 1, 10)]
-                                                         int workFactor)
+        [TestCase("key")]
+        [TestCase("")]
+        public void Constructor_ValidParams_Success(string keyAsString)
         {
-            var hs = new Sha512HashingService(key,
-                                              saltLength,
-                                              workFactor);
-            Assert.AreEqual(saltLength, hs.SaltLength);
-            Assert.AreEqual(workFactor, hs.WorkFactor);
-        }
-
-        [TestCase(null, 10, 10)]
-        [TestCase("",   10, 10)]
-        [TestCase(" ",  10, 10)]
-        [TestCase("\t", 10, 10)]
-        public void Constructor_InvalidParams_ArgumentExceptionThrown(string key,
-                                                                      int    saltLength,
-                                                                      int    workFactor)
-        {
-            Assert.Throws<ArgumentException>(() => new Sha512HashingService(key,
-                                                                            saltLength,
-                                                                            workFactor));
-        }
-
-        [TestCase("key", -1, 10)]
-        [TestCase("key", 10, -1)]
-        [TestCase("key", 10, 31)]
-        public void Constructor_InvalidParams_ArgumentOutOfRangeExceptionThrown(string key,
-                                                                                int    saltLength,
-                                                                                int    workFactor)
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Sha512HashingService(key,
-                                                                                      saltLength,
-                                                                                      workFactor));
+            byte[] key = Encoding.UTF8.GetBytes(keyAsString);
+            var    hs  = new Sha512HashingService(key);
         }
 
         [Test]
-        public void Hash_ValidParams_Success([Values("key")]
-                                             string key,
+        public void Hash_ValidParams_Success([Values("", " ", "data")]
+                                             string dataAsString,
 
                                              [Values(0, 1, 10)]
                                              int workFactor,
 
-                                             [Values("", "str")]
-                                             string str,
-
-                                             [Values("", "salt")]
-                                             string salt)
+                                             [Values("", " ", "salt")]
+                                             string saltAsString)
         {
-            var hs = new Sha512HashingService(key,
-                                              salt.Length,
-                                              workFactor);
+            byte[] data = dataAsString == null ? null : Encoding.UTF8.GetBytes(dataAsString);
+            byte[] salt = saltAsString == null ? null : Encoding.UTF8.GetBytes(saltAsString);
 
-            string hash = hs.Hash(str,
-                                  salt,
-                                  workFactor);
+            byte[] key  = Encoding.UTF8.GetBytes("key");
+            var    hs   = new Sha512HashingService(key);
+            byte[] hash = hs.Hash(data, workFactor, salt);
 
-            Assert.IsNotNullOrEmpty(hash);
-            Assert.AreNotEqual(hash, str);
-            Assert.AreNotEqual(hash, key);
-            Assert.AreNotEqual(hash, salt);
+            Assert.IsNotNull(hash);
+            Assert.AreNotEqual(hash, data);
         }
 
-        [TestCase("key", 8, 0,  null,  "")]
-        [TestCase("key", 8, 0,  null,  "salt")]
-        [TestCase("key", 8, 0,  "",    null)]
-        [TestCase("key", 8, 0,  "str", null)]
-        [TestCase("key", 8, 1,  null,  "")]
-        [TestCase("key", 8, 1,  null,  "salt")]
-        [TestCase("key", 8, 1,  "",    null)]
-        [TestCase("key", 8, 1,  "str", null)]
-        [TestCase("key", 8, 10, null,  "")]
-        [TestCase("key", 8, 10, null,  "salt")]
-        [TestCase("key", 8, 10, "",    null)]
-        [TestCase("key", 8, 10, "str", null)]
-        public void Hash_InvalidParams_ArgumentNullExceptionThrown(string key,
-                                                                   int    saltLength,
+        [TestCase(null,   1, "")]
+        [TestCase(null,   1, "salt")]
+        [TestCase("",     1, null)]
+        [TestCase("data", 1, null)]
+        public void Hash_InvalidParams_ArgumentNullExceptionThrown(string dataAsString,
                                                                    int    workFactor,
-                                                                   string str,
-                                                                   string salt)
+                                                                   string saltAsString)
         {
-            var hs = new Sha512HashingService(key,
-                                              saltLength,
-                                              workFactor);
+            byte[] data = dataAsString == null ? null : Encoding.UTF8.GetBytes(dataAsString);
+            byte[] salt = saltAsString == null ? null : Encoding.UTF8.GetBytes(saltAsString);
 
-            Assert.Throws<ArgumentNullException>(() => hs.Hash(str,
-                                                               salt,
-                                                               workFactor));
+            byte[] key = Encoding.UTF8.GetBytes("key");
+            var    hs  = new Sha512HashingService(key);
+
+            Assert.Throws<ArgumentNullException>(() => hs.Hash(data, workFactor, salt));
         }
 
-        [TestCase("key", 8, 0, -1, "str", "salt")]
-        [TestCase("key", 8, 0, 31, "str", "salt")]
-        public void Hash_InvalidParams_ArgumentOutOfRangeExceptionThrown(string key,
-                                                                         int    saltLength,
-                                                                         int    workFactor1,
-                                                                         int    workFactor2,
-                                                                         string str,
-                                                                         string salt)
+        [TestCase("",     -1,  "")]
+        [TestCase("data", -1,  "")]
+        [TestCase("",     -1,  "salt")]
+        [TestCase("data", -1,  "salt")]
+        [TestCase("",     31,  "")]
+        [TestCase("data", 31,  "")]
+        [TestCase("",     31,  "salt")]
+        [TestCase("data", 31,  "salt")]
+        [TestCase("data", -50, "salt")]
+        [TestCase("data", 50,  "salt")]
+        public void Hash_InvalidParams_ArgumentOutOfRangeExceptionThrown(string dataAsString,
+                                                                         int    workFactor,
+                                                                         string saltAsString)
         {
-            var hs = new Sha512HashingService(key,
-                                              saltLength,
-                                              workFactor1);
+            byte[] data = dataAsString == null ? null : Encoding.UTF8.GetBytes(dataAsString);
+            byte[] salt = saltAsString == null ? null : Encoding.UTF8.GetBytes(saltAsString);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => hs.Hash(str,
-                                                                     salt,
-                                                                     workFactor2));
+            byte[] key = Encoding.UTF8.GetBytes("key");
+            var    hs  = new Sha512HashingService(key);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => hs.Hash(data, workFactor, salt));
         }
     }
 }
