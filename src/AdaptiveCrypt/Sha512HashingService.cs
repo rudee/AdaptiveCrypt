@@ -22,15 +22,13 @@ namespace AdaptiveCrypt
         }
 
         public byte[] Hash(byte[] data,
-                           byte[] salt,
-                           int    workFactor)
+                           int    workFactor,
+                           byte[] salt)
         {
             if (data == null)
             {
                 throw new ArgumentNullException("data", "Cannot be null");
             }
-
-            salt = salt ?? new byte[] { };
 
             if (workFactor < MIN_VALID_WORK_FACTOR || MAX_VALID_WORK_FACTOR < workFactor)
             {
@@ -41,11 +39,14 @@ namespace AdaptiveCrypt
                                                                     MAX_VALID_WORK_FACTOR));
             }
 
-            byte[] sha512Key = CreateHashKey(_key,
-                                             salt,
-                                             workFactor,
-                                             KEY_SIZE);
-            var    sha512    = new HMACSHA512(sha512Key);
+            if (salt == null)
+            {
+                throw new ArgumentNullException("salt", "Cannot be null");
+            }
+
+            byte[] sha512Key = CreateHashKey(_key, workFactor, salt, KEY_SIZE);
+
+            var sha512 = new HMACSHA512(sha512Key);
 
             return sha512.ComputeHash(data);
         }
@@ -56,12 +57,12 @@ namespace AdaptiveCrypt
         /// <param name="key">The value used to create the hash key.</param>
         /// <param name="salt">The salt used to create the hash key.</param>
         /// <param name="workFactor">The work factor to use to determine the number of iterations.</param>
-        /// <param name="size">The size of the key in bytes to create.</param>
+        /// <param name="hashKeySize">The size of the key in bytes to create.</param>
         /// <returns>A pseudo-random key to be used to construct a HMACSHA512 instance.</returns>
         private static byte[] CreateHashKey(byte[] key,
-                                            byte[] salt,
                                             int    workFactor,
-                                            int    size)
+                                            byte[] salt,
+                                            int    hashKeySize)
         {
             int iterations = 1 << workFactor;
 
@@ -72,19 +73,17 @@ namespace AdaptiveCrypt
                 Array.Resize(ref salt, 8);
             }
 
-            var db = new Rfc2898DeriveBytes(key,
-                                            salt,
-                                            iterations);
+            var db = new Rfc2898DeriveBytes(key, salt, iterations);
 
             // Note: this next statement is meant to be computationally intensive depending on the
             // value of the iterations variable.
-            return db.GetBytes(size);
+            return db.GetBytes(hashKeySize);
         }
 
         private readonly byte[] _key;
 
         private const int MIN_VALID_WORK_FACTOR = 0;
         private const int MAX_VALID_WORK_FACTOR = 30;
-        private const int KEY_SIZE = 128; // 128 bytes is the recommended size for the HMACSHA512 secret key
+        private const int KEY_SIZE              = 128; // 128 bytes is the recommended size for the HMACSHA512 secret key
     }
 }

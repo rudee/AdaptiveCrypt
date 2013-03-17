@@ -22,15 +22,13 @@ namespace AdaptiveCrypt
         }
 
         public byte[] Encrypt(byte[] unencrypted,
-                              byte[] salt,
-                              int    workFactor)
+                              int    workFactor,
+                              byte[] salt)
         {
             if (unencrypted == null)
             {
                 throw new ArgumentNullException("unencrypted", "Cannot be null");
             }
-
-            salt = salt ?? new byte[] { };
 
             if (workFactor < MIN_VALID_WORK_FACTOR || MAX_VALID_WORK_FACTOR < workFactor)
             {
@@ -41,9 +39,14 @@ namespace AdaptiveCrypt
                                                                     MAX_VALID_WORK_FACTOR));
             }
 
+            if (salt == null)
+            {
+                throw new ArgumentNullException("salt", "Cannot be null");
+            }
+
             using (var aes = new AesCryptoServiceProvider())
             {
-                InitAesKeyAndIv(aes, salt, workFactor);
+                InitAesKeyAndIv(aes, workFactor, salt);
 
                 ICryptoTransform encryptor = aes.CreateEncryptor();
 
@@ -57,15 +60,13 @@ namespace AdaptiveCrypt
         }
 
         public byte[] Decrypt(byte[] encrypted,
-                              byte[] salt,
-                              int    workFactor)
+                              int    workFactor,
+                              byte[] salt)
         {
             if (encrypted == null)
             {
                 throw new ArgumentNullException("encrypted", "Cannot be null");
             }
-
-            salt = salt ?? new byte[] { };
 
             if (workFactor < MIN_VALID_WORK_FACTOR || MAX_VALID_WORK_FACTOR < workFactor)
             {
@@ -76,10 +77,15 @@ namespace AdaptiveCrypt
                                                                     MAX_VALID_WORK_FACTOR));
             }
 
+            if (salt == null)
+            {
+                throw new ArgumentNullException("salt", "Cannot be null");
+            }
+
             using (var encryptedMemoryStream = new MemoryStream(encrypted))
             using (var aes = new AesCryptoServiceProvider())
             {
-                InitAesKeyAndIv(aes, salt, workFactor);
+                InitAesKeyAndIv(aes, workFactor, salt);
                 ICryptoTransform decryptor = aes.CreateDecryptor();
 
                 using (var cs = new CryptoStream(encryptedMemoryStream, decryptor, CryptoStreamMode.Read))
@@ -97,11 +103,11 @@ namespace AdaptiveCrypt
         /// Initialises the key and initialisation vector of the SymmetricAlgorithm instance.
         /// </summary>
         /// <param name="aes">The instance of SymmetricAlgorithm to initialise for.</param>
-        /// <param name="salt">The salt string to be used to generate the key and key and initialisation.</param>
         /// <param name="workFactor">The work factor to use to determine the number of iterations.</param>
+        /// <param name="salt">The salt string to be used to generate the key and key and initialisation.</param>
         private void InitAesKeyAndIv(SymmetricAlgorithm aes,
-                                     byte[]             salt,
-                                     int                workFactor)
+                                     int                workFactor,
+                                     byte[]             salt)
         {
             int iterations = 1 << workFactor;
 
@@ -112,9 +118,7 @@ namespace AdaptiveCrypt
                 Array.Resize(ref salt, 8);
             }
 
-            var db = new Rfc2898DeriveBytes(_key,
-                                            salt,
-                                            iterations);
+            var db = new Rfc2898DeriveBytes(_key, salt, iterations);
 
             // KeySize and BlockSize values are in bits, divide by 8 to get size in bytes
             // Note: the next 2 statements are meant to be computationally intensive depending on

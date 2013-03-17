@@ -19,39 +19,31 @@ namespace AdaptiveCrypt
 
         public ModularCrypt(string modularCryptFormatStr)
         {
-            if (modularCryptFormatStr == null)
-            {
-                throw new ArgumentNullException("Cannot be null.",
-                                                "modularCryptFormatStr");
-            }
-
             if (string.IsNullOrWhiteSpace(modularCryptFormatStr))
             {
-                throw new ArgumentException("Cannot be empty or whitespace.",
-                                            "modularCryptFormatStr");
+                throw new ArgumentException("Cannot be null, empty or whitespace.", "modularCryptFormatStr");
             }
 
             // First character is the delim character
             char delim = modularCryptFormatStr[0];
             if (INVALID_DELIM_ALPHABET.Contains(delim))
             {
-                throw new ArgumentException("Invalid delim character.",
-                                            "modularCryptFormatStr");
+                throw new ArgumentException("Delim character not allowed. '" + delim + "'");
             }
 
-            // Split into ModularCrypt parts
+            // Split into ModularCrypt segments
             string[] mcSegments = modularCryptFormatStr.Split(new[] { delim }, StringSplitOptions.None);
             if (mcSegments.Length - 1 != 4)
             {
-                throw new ArgumentException("Invalid ModularCryptFormat String: " + modularCryptFormatStr,
-                                            "modularCryptFormatStr");
+                throw new ArgumentException("Invalid ModularCryptFormat String: " + modularCryptFormatStr, "modularCryptFormatStr");
             }
 
-            // WorkFactor part must be an int
+            // WorkFactor part must be a non-negative integer
             int workFactor;
-            if (!int.TryParse(mcSegments[FORMAT_WORKFACTOR_INDEX], out workFactor))
+            if (!int.TryParse(mcSegments[FORMAT_WORKFACTOR_INDEX], out workFactor)
+                || workFactor < 0)
             {
-                throw new ArgumentException("Invalid WorkFactor segment", "modularCryptFormatStr");
+                throw new ArgumentException("WorkFactor segment must be a non-negative integer", "modularCryptFormatStr");
             }
 
             // Salt part must be a Base64 string
@@ -69,11 +61,11 @@ namespace AdaptiveCrypt
             byte[] cipher;
             try
             {
-                cipher = mcSegments[FORMAT_CIPHER_INDEX] != string.Empty ? Convert.FromBase64String(mcSegments[FORMAT_CIPHER_INDEX]) : null;
+                cipher = mcSegments[FORMAT_CIPHER_INDEX] != string.Empty ? Convert.FromBase64String(mcSegments[FORMAT_CIPHER_INDEX]) : new byte[] { };
             }
             catch (IndexOutOfRangeException)
             {
-                cipher = null;
+                cipher = new byte[] { };
             }
             catch (ArgumentNullException)
             {
@@ -99,20 +91,27 @@ namespace AdaptiveCrypt
         {
             if (INVALID_DELIM_ALPHABET.Contains(delim))
             {
-                throw new ArgumentException("Invalid delim character.",
-                                            "modularCryptFormatStr");
+                throw new ArgumentException("Invalid delim character.", "modularCryptFormatStr");
             }
 
             if (identifier == null)
             {
-                throw new ArgumentException("Cannot be null.",
-                                            "identifier");
+                throw new ArgumentException("Cannot be null.", "identifier");
+            }
+
+            if (workFactor < 0)
+            {
+                throw new ArgumentException("Must be a non-negative integer.", "workFactor");
             }
 
             if (salt == null)
             {
-                throw new ArgumentException("Cannot be null.",
-                                            "salt");
+                throw new ArgumentException("Cannot be null.", "salt");
+            }
+
+            if (cipher == null)
+            {
+                throw new ArgumentException("Cannot be null.", "cipher");
             }
 
             _delim      = delim;

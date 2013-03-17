@@ -130,8 +130,8 @@ namespace AdaptiveCrypt
             }
 
             byte[] hash = hashingService.Hash(data,
-                                              modularCrypt.Salt,
-                                              modularCrypt.WorkFactor);
+                                              modularCrypt.WorkFactor,
+                                              modularCrypt.Salt);
 
             return new ModularCrypt(ModularCryptDelim,
                                     modularCrypt.Identifier,
@@ -155,8 +155,8 @@ namespace AdaptiveCrypt
             }
 
             byte[] encrypted = encryptionService.Encrypt(unencrypted,
-                                                         modularCrypt.Salt,
-                                                         modularCrypt.WorkFactor);
+                                                         modularCrypt.WorkFactor,
+                                                         modularCrypt.Salt);
 
             return new ModularCrypt(ModularCryptDelim,
                                     modularCrypt.Identifier,
@@ -174,8 +174,8 @@ namespace AdaptiveCrypt
             }
 
             return encryptionService.Decrypt(modularCrypt.Cipher,
-                                             modularCrypt.Salt,
-                                             modularCrypt.WorkFactor);
+                                             modularCrypt.WorkFactor,
+                                             modularCrypt.Salt);
         }
 
         private byte[] GenerateSalt(int saltLengthInBytes)

@@ -9,11 +9,11 @@
         /// Creates a cryptographic hash.
         /// </summary>
         /// <param name="data">The value to hash</param>
-        /// <param name="salt">The salt to use to create the cryptographic hash</param>
         /// <param name="workFactor">The work factor to use to create the cryptographic hash</param>
+        /// <param name="salt">The salt to use to create the cryptographic hash</param>
         /// <returns></returns>
         byte[] Hash(byte[] data,
-                    byte[] salt,
-                    int    workFactor);
+                    int    workFactor,
+                    byte[] salt);
     }
 }
