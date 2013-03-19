@@ -48,12 +48,18 @@ namespace AdaptiveCrypt.Test
             byte[] data = dataAsString == null ? null : Encoding.UTF8.GetBytes(dataAsString);
             byte[] salt = saltAsString == null ? null : Encoding.UTF8.GetBytes(saltAsString);
 
-            byte[] key  = Encoding.UTF8.GetBytes("key");
-            var    hs   = new Sha512HashingService(key);
-            byte[] hash = hs.Hash(data, workFactor, salt);
+            byte[] key1 = Encoding.UTF8.GetBytes("key1");
+            byte[] key2 = Encoding.UTF8.GetBytes("key2");
+            var    hs1  = new Sha512HashingService(key1);
+            var    hs2  = new Sha512HashingService(key2);
+            byte[] hash1 = hs1.Hash(data, workFactor, salt);
+            byte[] hash2 = hs2.Hash(data, workFactor, salt);
 
-            Assert.IsNotNull(hash);
-            Assert.AreNotEqual(hash, data);
+            Assert.IsNotNull(hash1);
+            Assert.IsNotNull(hash2);
+            Assert.AreNotEqual(hash1, data);
+            Assert.AreNotEqual(hash2, data);
+            Assert.AreNotEqual(hash1, hash2);
         }
 
         [TestCase(null,   1, "")]

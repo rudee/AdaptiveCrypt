@@ -38,22 +38,30 @@ namespace AdaptiveCrypt.Test
         [Test]
         public void Encrypt_ValidParams_Success([Values(" ", "unencrypted")]
                                                 string unencryptedAsString,
-            
+
                                                 [Values(0, 1, 10)]
                                                 int workFactor,
 
                                                 [Values("", " ", "salt")]
                                                 string saltAsString)
         {
-            byte[] unencrypted = unencryptedAsString == null ? null : Encoding.UTF8.GetBytes(unencryptedAsString);
-            byte[] salt        = saltAsString        == null ? null : Encoding.UTF8.GetBytes(saltAsString);
+            byte[] unencrypted = Encoding.UTF8.GetBytes(unencryptedAsString);
+            byte[] salt        = Encoding.UTF8.GetBytes(saltAsString);
 
-            byte[] key       = Encoding.UTF8.GetBytes("key");
-            var    es        = new AesEncryptionService(key);
-            byte[] encrypted = es.Encrypt(unencrypted, workFactor, salt);
+            byte[] key1       = Encoding.UTF8.GetBytes("key1");
+            byte[] key2       = Encoding.UTF8.GetBytes("key2");
+            var    es1        = new AesEncryptionService(key1);
+            var    es2        = new AesEncryptionService(key2);
+            byte[] encrypted1 = es1.Encrypt(unencrypted, workFactor, salt);
+            byte[] encrypted2 = es2.Encrypt(unencrypted, workFactor, salt);
 
-            Assert.IsNotNull(encrypted);
-            Assert.AreNotEqual(encrypted, unencrypted);
+            Assert.IsNotNull(encrypted1);
+            Assert.IsNotNull(encrypted2);
+            Assert.IsNotEmpty(encrypted1);
+            Assert.IsNotEmpty(encrypted2);
+            Assert.AreNotEqual(encrypted1, unencrypted);
+            Assert.AreNotEqual(encrypted2, unencrypted);
+            Assert.AreNotEqual(encrypted1, encrypted2);
         }
 
         [TestCase(null,          1, "")]
@@ -96,7 +104,6 @@ namespace AdaptiveCrypt.Test
             Assert.Throws<ArgumentOutOfRangeException>(() => es.Encrypt(unencrypted, workFactor, salt));
         }
 
-
         [Test]
         public void Decrypt_ValidParams_Success([Values(" ", "unencrypted")]
                                                 string unencryptedAsString,
@@ -107,15 +114,26 @@ namespace AdaptiveCrypt.Test
                                                 [Values("", " ", "salt")]
                                                 string saltAsString)
         {
-            byte[] unencrypted = unencryptedAsString == null ? null : Encoding.UTF8.GetBytes(unencryptedAsString);
-            byte[] salt        = saltAsString        == null ? null : Encoding.UTF8.GetBytes(saltAsString);
+            byte[] unencrypted = Encoding.UTF8.GetBytes(unencryptedAsString);
+            byte[] salt        = Encoding.UTF8.GetBytes(saltAsString);
 
-            byte[] key       = Encoding.UTF8.GetBytes("key");
-            var    es        = new AesEncryptionService(key);
-            byte[] encrypted = es.Encrypt(unencrypted, workFactor, salt);
-            byte[] decrypted = es.Decrypt(encrypted, workFactor, salt);
+            byte[] key1       = Encoding.UTF8.GetBytes("key1");
+            byte[] key2       = Encoding.UTF8.GetBytes("key2");
+            var    es1        = new AesEncryptionService(key1);
+            var    es2        = new AesEncryptionService(key2);
+            byte[] encrypted1 = es1.Encrypt(unencrypted, workFactor, salt);
+            byte[] encrypted2 = es2.Encrypt(unencrypted, workFactor, salt);
+            byte[] decrypted1 = es1.Decrypt(encrypted1,  workFactor, salt);
+            byte[] decrypted2 = es2.Decrypt(encrypted2,  workFactor, salt);
 
-            Assert.AreNotEqual(unencrypted, decrypted);
+            Assert.IsNotNull(encrypted1);
+            Assert.IsNotNull(encrypted2);
+            Assert.IsNotEmpty(encrypted1);
+            Assert.IsNotEmpty(encrypted2);
+            Assert.AreNotEqual(encrypted1, encrypted2);
+            Assert.AreEqual(decrypted1, decrypted2);
+            Assert.AreEqual(unencrypted, decrypted1);
+            Assert.AreEqual(unencrypted, decrypted2);
         }
     }
 }
