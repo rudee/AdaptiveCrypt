@@ -109,11 +109,6 @@ namespace AdaptiveCrypt
                 throw new ArgumentException("Cannot be null.", "salt");
             }
 
-            if (cipher == null)
-            {
-                throw new ArgumentException("Cannot be null.", "cipher");
-            }
-
             _delim      = delim;
             _identifier = identifier;
             _workFactor = workFactor;

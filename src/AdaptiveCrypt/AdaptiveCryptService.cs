@@ -13,6 +13,26 @@ namespace AdaptiveCrypt
                                     string             defaultEncryptionIdentifier,
                                     int?               defaultEncryptionWorkFactor,
                                     int?               defaultEncryptionSaltLength,
+                                    IEncryptionService defaultEncryptionService)
+            : this(defaultHashingIdentifier,
+                   defaultHashingWorkFactor,
+                   defaultHashingSaltLength,
+                   defaultHashingService,
+                   defaultEncryptionIdentifier,
+                   defaultEncryptionWorkFactor,
+                   defaultEncryptionSaltLength,
+                   defaultEncryptionService,
+                   null)
+        {
+        }
+
+        public AdaptiveCryptService(string             defaultHashingIdentifier,
+                                    int?               defaultHashingWorkFactor,
+                                    int?               defaultHashingSaltLength,
+                                    IHashingService    defaultHashingService,
+                                    string             defaultEncryptionIdentifier,
+                                    int?               defaultEncryptionWorkFactor,
+                                    int?               defaultEncryptionSaltLength,
                                     IEncryptionService defaultEncryptionService,
                                     char?              modularCryptDelim)
         {
@@ -44,10 +64,13 @@ namespace AdaptiveCrypt
                 _encryptionServices.Add(defaultEncryptionIdentifier, defaultEncryptionService);
             }
 
+            if (!_hashingServices.Any() && !_encryptionServices.Any())
+            {
+                throw new ArgumentException("Must specify a default Hashing Service or a default Encryption Service.");
+            }
+
             _modularCryptDelim = modularCryptDelim ?? DEFAULT_MODULAR_CRYPT_DELIM;
         }
-
-        public char ModularCryptDelim { get; set; }
 
         public void AddHashingService(string          hashingIdentifier,
                                       IHashingService hashingService)
@@ -85,36 +108,6 @@ namespace AdaptiveCrypt
             _encryptionServices.Add(encryptionIdentifier, encryptionService);
         }
 
-        public ModularCrypt GenerateModularCryptForHashing()
-        {
-            IHashingService hashingService;
-            if (_hashingServices.TryGetValue(_defaultHashingIdentifier, out hashingService))
-            {
-                throw new NotSupportedException("No IHashingService with the identifier " + _defaultHashingIdentifier + " configured.");
-            }
-
-            return new ModularCrypt(_modularCryptDelim,
-                                    _defaultHashingIdentifier,
-                                    _defaultHashingWorkFactor,
-                                    GenerateSalt(_defaultHashingSaltLength),
-                                    null);
-        }
-
-        public ModularCrypt GenerateModularCryptForEncryption()
-        {
-            IEncryptionService encryptionService;
-            if (_encryptionServices.TryGetValue(_defaultEncryptionIdentifier, out encryptionService))
-            {
-                throw new NotSupportedException("No IEncryptionService with the identifier " + _defaultEncryptionIdentifier + " configured.");
-            }
-
-            return new ModularCrypt(_modularCryptDelim,
-                                    _defaultEncryptionIdentifier,
-                                    _defaultEncryptionWorkFactor,
-                                    GenerateSalt(_defaultEncryptionSaltLength),
-                                    null);
-        }
-
         public ModularCrypt Hash(byte[] data)
         {
             return Hash(data, GenerateModularCryptForHashing());
@@ -124,7 +117,11 @@ namespace AdaptiveCrypt
                                  ModularCrypt modularCrypt)
         {
             IHashingService hashingService;
-            if (_hashingServices.TryGetValue(modularCrypt.Identifier, out hashingService))
+            try
+            {
+                hashingService = _hashingServices[modularCrypt.Identifier];
+            }
+            catch (KeyNotFoundException)
             {
                 throw new NotSupportedException("No IHashingService with the identifier " + modularCrypt.Identifier + " configured.");
             }
@@ -133,7 +130,7 @@ namespace AdaptiveCrypt
                                               modularCrypt.WorkFactor,
                                               modularCrypt.Salt);
 
-            return new ModularCrypt(ModularCryptDelim,
+            return new ModularCrypt(_modularCryptDelim,
                                     modularCrypt.Identifier,
                                     modularCrypt.WorkFactor,
                                     modularCrypt.Salt,
@@ -149,7 +146,11 @@ namespace AdaptiveCrypt
                                     ModularCrypt modularCrypt)
         {
             IEncryptionService encryptionService;
-            if (_encryptionServices.TryGetValue(modularCrypt.Identifier, out encryptionService))
+            try
+            {
+                encryptionService = _encryptionServices[modularCrypt.Identifier];
+            }
+            catch (KeyNotFoundException)
             {
                 throw new NotSupportedException("No IEncryptionService with the identifier " + modularCrypt.Identifier + " configured.");
             }
@@ -158,7 +159,7 @@ namespace AdaptiveCrypt
                                                          modularCrypt.WorkFactor,
                                                          modularCrypt.Salt);
 
-            return new ModularCrypt(ModularCryptDelim,
+            return new ModularCrypt(_modularCryptDelim,
                                     modularCrypt.Identifier,
                                     modularCrypt.WorkFactor,
                                     modularCrypt.Salt,
@@ -168,7 +169,11 @@ namespace AdaptiveCrypt
         public byte[] Decrypt(ModularCrypt modularCrypt)
         {
             IEncryptionService encryptionService;
-            if (_encryptionServices.TryGetValue(modularCrypt.Identifier, out encryptionService))
+            try
+            {
+                encryptionService = _encryptionServices[modularCrypt.Identifier];
+            }
+            catch (KeyNotFoundException)
             {
                 throw new NotSupportedException("No IEncryptionService with the identifier " + modularCrypt.Identifier + " configured.");
             }
@@ -176,6 +181,24 @@ namespace AdaptiveCrypt
             return encryptionService.Decrypt(modularCrypt.Cipher,
                                              modularCrypt.WorkFactor,
                                              modularCrypt.Salt);
+        }
+
+        private ModularCrypt GenerateModularCryptForHashing()
+        {
+            return new ModularCrypt(_modularCryptDelim,
+                                    _defaultHashingIdentifier,
+                                    _defaultHashingWorkFactor,
+                                    GenerateSalt(_defaultHashingSaltLength),
+                                    null);
+        }
+
+        private ModularCrypt GenerateModularCryptForEncryption()
+        {
+            return new ModularCrypt(_modularCryptDelim,
+                                    _defaultEncryptionIdentifier,
+                                    _defaultEncryptionWorkFactor,
+                                    GenerateSalt(_defaultEncryptionSaltLength),
+                                    null);
         }
 
         private byte[] GenerateSalt(int saltLengthInBytes)
@@ -196,21 +219,5 @@ namespace AdaptiveCrypt
         private IDictionary<string, IEncryptionService> _encryptionServices;
         private static readonly Random s_random = new Random();
         private const char DEFAULT_MODULAR_CRYPT_DELIM = '$';
-    }
-
-    public class Sample
-    {
-        public static void Foo()
-        {
-            var acs = new AdaptiveCryptService("sha512",
-                                               10,
-                                               8,
-                                               new Sha512HashingService(null),
-                                               null,
-                                               null,
-                                               null,
-                                               null,
-                                               null);
-        }
     }
 }

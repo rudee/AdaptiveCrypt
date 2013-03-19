@@ -51,9 +51,11 @@ namespace AdaptiveCrypt
                 ICryptoTransform encryptor = aes.CreateEncryptor();
 
                 using (var ms = new MemoryStream())
-                using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
                 {
-                    cs.Write(unencrypted, 0, unencrypted.Length);
+                    using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                    {
+                        cs.Write(unencrypted, 0, unencrypted.Length);
+                    }
                     return ms.ToArray();
                 }
             }
